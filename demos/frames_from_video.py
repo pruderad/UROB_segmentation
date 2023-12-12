@@ -20,7 +20,7 @@ def extract_frames(video_path, output_folder):
             break
 
         # Save the frame as an image
-        frame_name = f"frame_{i + 1}.jpg"
+        frame_name = f"frame_{i + 1 + 714}.jpg"
         frame_path = os.path.join(output_folder, frame_name)
         cv2.imwrite(frame_path, frame)
 
@@ -29,7 +29,7 @@ def extract_frames(video_path, output_folder):
 
 if __name__ == "__main__":
     # Set the path to the video file and the output folder
-    video_path = "rb_car.mp4"
+    video_path = "rb_car1.mp4"
     output_folder = "../dataset/unlabeled_dataset/max_car"
 
     # Extract frames from the video
