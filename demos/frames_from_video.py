@@ -29,8 +29,8 @@ def extract_frames(video_path, output_folder):
 
 if __name__ == "__main__":
     # Set the path to the video file and the output folder
-    video_path = "max.mp4"
-    output_folder = "data1"
+    video_path = "rb_car.mp4"
+    output_folder = "../dataset/unlabeled_dataset/max_car"
 
     # Extract frames from the video
     extract_frames(video_path, output_folder)
