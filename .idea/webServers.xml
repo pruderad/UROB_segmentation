@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="462f1c5d-6587-40f5-a118-b198a98aa3e0" name="taylor">
+        <fileTransfer rootFolder="/home.nfs/kodejond" accessType="SFTP" host="taylor.felk.cvut.cz" port="22" sshConfigId="d3f86c38-731f-4c5a-84d9-50d54dd6c034" sshConfig="kodejond@taylor.felk.cvut.cz:22 password">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+      <webServer id="b15bb9a4-c839-4177-8b7e-215a6f028522" name="taylor2">
+        <fileTransfer accessType="FTPS" port="21">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>
