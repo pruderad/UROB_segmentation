@@ -46,31 +46,6 @@ class UROBDataset(Dataset):
         return img, labels
 
 
-    def padd(self, image: np.ndarray, labels: np.ndarray, ignore_label = 30):
-        
-
-        h, w, c = image.shape
-        
-        if w > h:
-            image = np.transpose(image, (1, 0, 2))
-            labels = labels.T
-            h, w, c = image.shape
-
-        result_labels = np.full(self.target_shape + [1], ignore_label, dtype=image.dtype)
-        result = np.zeros(self.target_shape + [c],dtype=image.dtype)
-        # Calculate the starting position to place the image in the center
-        start_h = (self.target_shape[0] - h) // 2
-        start_w = (self.target_shape[1] - w) // 2
-
-        # Copy the image to the center of the result array
-        print(image.shape, labels.shape)
-        print(labels.reshape((h,w,1)).shape, [h,w,c])
-        result[start_h:start_h + h, start_w:start_w + w, :] = image
-        result_labels[start_h:start_h + h, start_w:start_w + w, :] = labels.reshape((h,w,1))
-
-        return result
-            
-
 
 
 

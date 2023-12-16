@@ -1,5 +1,10 @@
 import cv2
 import os
+from PIL import Image
+from torchvision import transforms
+import numpy as np
+
+transform = transforms.Compose([transforms.Resize(512, Image.BICUBIC)])
 
 def extract_frames(video_path, output_folder):
     # Open the video file
@@ -22,6 +27,11 @@ def extract_frames(video_path, output_folder):
     # Loop through each frame and save it as an image
     for i in range(frame_count):
         ret, frame = cap.read()
+
+        # resize the image
+        img_pil = Image.fromarray(frame)
+        frame = np.asarray(transform(img_pil))
+
         if not ret:
             break
         # Save the frame as an image
