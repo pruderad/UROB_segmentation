@@ -17,12 +17,14 @@ def get_cls_stats(predict_labels: torch.tensor, labels: torch.tensor, unique_lab
     false_positives = []
     false_negatives = []
 
+    temp_predict_labels = predict_labels[labels != ignore_label]
+    temp_labels = labels.clone()[labels != ignore_label]
     for cls_label in unique_labels:
-
-        cls_true_posities = torch.sum(torch.logical_and(torch.logical_and(labels != ignore_label, labels == cls_label) , predict_labels == cls_label)).item()
-        cls_true_negatives = torch.sum(torch.logical_and(torch.logical_and(labels != ignore_label,labels != cls_label), predict_labels != cls_label)).item()
-        cls_false_positives = torch.sum(torch.logical_and(torch.logical_and(labels != ignore_label,labels != cls_label), predict_labels == cls_label)).item()
-        cls_false_negatives = torch.sum(torch.logical_and(torch.logical_and(labels != ignore_label,labels == cls_label), predict_labels != cls_label)).item()
+        
+        cls_true_posities = torch.sum(torch.logical_and(temp_labels == cls_label, temp_predict_labels == cls_label)).item()
+        cls_true_negatives = torch.sum(torch.logical_and(temp_labels != cls_label, temp_predict_labels != cls_label)).item()
+        cls_false_positives = torch.sum(torch.logical_and(temp_labels != cls_label, temp_predict_labels == cls_label)).item()
+        cls_false_negatives = torch.sum(torch.logical_and(temp_labels == cls_label, temp_predict_labels != cls_label)).item()
 
         true_posities.append(cls_true_posities)
         true_negatives.append(cls_true_negatives)
@@ -43,7 +45,7 @@ def compute_cls_iou(cls_tp: torch.tensor, cls_tn: torch.tensor, cls_fp: torch.te
     # iou = true_positive / (true_positive + false_positive + false_negative)
     return iou
 
-def validate(val_dataloader, model, device, criterion, unique_labels: list, visualize: bool = False, ignore_label: int = 32):
+def validate(val_dataloader, model, device, criterion, unique_labels: list, visualize: bool = False, ignore_label: int = 10):
 
     print(' ------- VALIDATING ------- ')
     pbar = tqdm(total=len(val_dataloader))

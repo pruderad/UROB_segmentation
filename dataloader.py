@@ -8,7 +8,7 @@ from torchvision import transforms
 
 class UROBDataset(Dataset):
 
-    def __init__(self, filenames_file: str, target_img_shape: list,  label_mapping: dict = None, ignore_label: int = 32) -> None:
+    def __init__(self, filenames_file: str, target_img_shape: list,  label_mapping: dict = None, ignore_label: int = 10) -> None:
         with open(filenames_file, 'rb') as file:
             self.filenames = pickle.load(file)
 
