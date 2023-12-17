@@ -10,7 +10,7 @@ def imshow(img):
     plt.imshow(np.transpose(npimg, (1, 2, 0)))
     plt.show()
 
-def get_cls_stats(predict_labels: torch.tensor, labels: torch.tensor, unique_labels: list):
+def get_cls_stats(predict_labels: torch.tensor, labels: torch.tensor, unique_labels: list, ignore_label: int):
 
     true_posities = []
     true_negatives = []
@@ -19,16 +19,15 @@ def get_cls_stats(predict_labels: torch.tensor, labels: torch.tensor, unique_lab
 
     for cls_label in unique_labels:
 
-        cls_true_posities = torch.sum(torch.logical_and(labels == cls_label, predict_labels == cls_label)).item()
-        cls_true_negatives = torch.sum(torch.logical_and(labels != cls_label, predict_labels != cls_label)).item()
-        cls_false_positives = torch.sum(torch.logical_and(labels != cls_label, predict_labels == cls_label)).item()
-        cls_false_negatives = torch.sum(torch.logical_and(labels == cls_label, predict_labels != cls_label)).item()
+        cls_true_posities = torch.sum(torch.logical_and(torch.logical_and(labels != ignore_label, labels == cls_label) , predict_labels == cls_label)).item()
+        cls_true_negatives = torch.sum(torch.logical_and(torch.logical_and(labels != ignore_label,labels != cls_label), predict_labels != cls_label)).item()
+        cls_false_positives = torch.sum(torch.logical_and(torch.logical_and(labels != ignore_label,labels != cls_label), predict_labels == cls_label)).item()
+        cls_false_negatives = torch.sum(torch.logical_and(torch.logical_and(labels != ignore_label,labels == cls_label), predict_labels != cls_label)).item()
 
         true_posities.append(cls_true_posities)
         true_negatives.append(cls_true_negatives)
         false_positives.append(cls_false_positives)
         false_negatives.append(cls_false_negatives)
-        assert cls_false_negatives + cls_true_posities + cls_true_negatives + cls_false_positives == predict_labels.numel()
 
     true_posities = torch.tensor(true_posities)
     true_negatives = torch.tensor(true_negatives)
@@ -44,7 +43,7 @@ def compute_cls_iou(cls_tp: torch.tensor, cls_tn: torch.tensor, cls_fp: torch.te
     # iou = true_positive / (true_positive + false_positive + false_negative)
     return iou
 
-def validate(val_dataloader, model, device, criterion, unique_labels: list, visualize: bool = False):
+def validate(val_dataloader, model, device, criterion, unique_labels: list, visualize: bool = False, ignore_label: int = 32):
 
     print(' ------- VALIDATING ------- ')
     pbar = tqdm(total=len(val_dataloader))
@@ -65,7 +64,7 @@ def validate(val_dataloader, model, device, criterion, unique_labels: list, visu
             y_val = y_val.long().to(device=device)      
             
             output = model(X_val)
-            loss = criterion(output, y_val).mean()
+            loss = criterion(output, y_val)
             predict_labels = torch.argmax(output, dim=1)
 
             if visualize:
@@ -81,7 +80,8 @@ def validate(val_dataloader, model, device, criterion, unique_labels: list, visu
             true_positives, true_negatives, false_positives, false_negatives = get_cls_stats(
                 predict_labels=predict_labels.cpu(),
                 labels=y_val.cpu(),
-                unique_labels=unique_labels
+                unique_labels=unique_labels,
+                ignore_label=ignore_label
             )
             if total_true_positives is None:
                 total_true_positives = true_positives
