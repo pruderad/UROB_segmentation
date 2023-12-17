@@ -12,12 +12,7 @@ class UROBDataset(Dataset):
         with open(filenames_file, 'rb') as file:
             self.filenames = pickle.load(file)
 
-        if label_mapping is not None:
-            self.label_mapping = label_mapping
-        else:
-            self.label_mapping = {
-                2 : 1 # car
-            }
+        self.label_mapping = label_mapping
 
         self.target_shape = target_img_shape
         self.ignore_label = ignore_label
@@ -52,7 +47,7 @@ class UROBDataset(Dataset):
         transformed_img = np.asarray(self.transform(img_pil))
 
         img = np.zeros((*self.target_shape, 3), dtype=transformed_img.dtype)
-        labels = self.ignore_label * np.ones(self.target_shape, dtype=labels_orig.dtype) # TODO() add ignore labels
+        labels = self.ignore_label * np.ones(self.target_shape, dtype=labels_orig.dtype) 
         start_idx = (self.target_shape[1] - transformed_img.shape[1]) // 2 
         assert start_idx >= 0
 
