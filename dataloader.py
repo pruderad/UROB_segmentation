@@ -4,9 +4,11 @@ import numpy as np
 import torch
 from PIL import ImageOps, Image
 from torchvision import transforms
+
+
 class UROBDataset(Dataset):
 
-    def __init__(self, filenames_file: str, target_img_shape: list,  label_mapping: dict = None) -> None:
+    def __init__(self, filenames_file: str, target_img_shape: list,  label_mapping: dict = None, ignore_label: int = 32) -> None:
         with open(filenames_file, 'rb') as file:
             self.filenames = pickle.load(file)
 
@@ -18,7 +20,7 @@ class UROBDataset(Dataset):
             }
 
         self.target_shape = target_img_shape
-
+        self.ignore_label = ignore_label
         self.transform = transforms.Compose([transforms.Resize(512, interpolation=Image.BICUBIC, antialias=True)])
 
     def __len__(self):
@@ -50,7 +52,7 @@ class UROBDataset(Dataset):
         transformed_img = np.asarray(self.transform(img_pil))
 
         img = np.zeros((*self.target_shape, 3), dtype=transformed_img.dtype)
-        labels = np.zeros(self.target_shape, dtype=labels_orig.dtype) # TODO() add ignore labels
+        labels = self.ignore_label * np.ones(self.target_shape, dtype=labels_orig.dtype) # TODO() add ignore labels
         start_idx = (self.target_shape[1] - transformed_img.shape[1]) // 2 
         assert start_idx >= 0
 
