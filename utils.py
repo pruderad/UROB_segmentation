@@ -35,7 +35,7 @@ def compute_cls_iou(cls_tp: torch.tensor, cls_tn: torch.tensor, cls_fp: torch.te
     # iou = true_positive / (true_positive + false_positive + false_negative)
     return iou
 
-def validate(val_dataloader, model, device, criterion, batch_size, unique_labels: list):
+def validate(val_dataloader, model, device, criterion, unique_labels: list):
 
     print(' ------- VALIDATING ------- ')
     pbar = tqdm(total=len(val_dataloader))
@@ -77,7 +77,7 @@ def validate(val_dataloader, model, device, criterion, batch_size, unique_labels
                 total_false_positives += false_positives
                 total_false_negatives += false_negatives
     
-            pbar.update(batch_size)
+            pbar.update(1)
     pbar.close()
     model.train()
 
