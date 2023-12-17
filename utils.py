@@ -2,6 +2,8 @@ import torch
 from tqdm import tqdm
 import numpy as np
 import matplotlib.pyplot as plt
+import os
+from PIL import Image
 
 
 def imshow(img):
@@ -9,6 +11,14 @@ def imshow(img):
     npimg = img.numpy()
     plt.imshow(np.transpose(npimg, (1, 2, 0)))
     plt.show()
+
+def imsave(img, path):
+    img = (img + 1) / 2  # unnormalize
+    np_img = img.numpy()
+    np_img = (np_img * 255).astype(np.uint8)
+    np_img = np.transpose(np_img, (1, 2, 0))
+    pil_img = Image.fromarray(np_img)
+    pil_img.save(path)
 
 def get_cls_stats(predict_labels: torch.tensor, labels: torch.tensor, unique_labels: list, ignore_label: int):
 
@@ -45,7 +55,7 @@ def compute_cls_iou(cls_tp: torch.tensor, cls_tn: torch.tensor, cls_fp: torch.te
     # iou = true_positive / (true_positive + false_positive + false_negative)
     return iou
 
-def validate(val_dataloader, model, device, criterion, unique_labels: list, visualize: bool = False, ignore_label: int = 10):
+def validate(val_dataloader, model, device, criterion, unique_labels: list, visualize: bool = False, ignore_label: int = 10, save_path: str = None):
 
     print(' ------- VALIDATING ------- ')
     pbar = tqdm(total=len(val_dataloader))
@@ -60,7 +70,6 @@ def validate(val_dataloader, model, device, criterion, unique_labels: list, visu
 
     with torch.no_grad():
         for val_iter, val_data in enumerate(val_dataloader):
-
             X_val, y_val = val_data
             X_val = X_val.float().to(device=device)
             y_val = y_val.long().to(device=device)      
@@ -69,12 +78,19 @@ def validate(val_dataloader, model, device, criterion, unique_labels: list, visu
             loss = criterion(output, y_val)
             predict_labels = torch.argmax(output, dim=1)
 
-            if visualize:
+            if visualize or save_path is not None:
                 # visualize the first image form the batch
                 vis_labels = predict_labels[0, :, :].cpu().clone()
                 img_vis = X_val[0, :, :, :].cpu().clone()
-                img_vis[:, vis_labels != 1] = 0
-                imshow(img_vis)
+                #img_vis[2, vis_labels != 1] = 255
+                true_abels = y_val[0, :, :].cpu().clone().numpy()
+                img_vis[0, np.logical_and(vis_labels == 1, true_abels != 10)] = 1
+                if save_path is not None:
+                    img_name = f'val_sample_{val_iter}.jpg'
+                    img_path = os.path.join(save_path, img_name)
+                    imsave(img_vis, img_path)
+                if visualize:
+                    imshow(img_vis)
 
 
             # compute statistics for metrics
