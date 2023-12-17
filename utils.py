@@ -70,9 +70,9 @@ def validate(val_dataloader, model, device, criterion, unique_labels: list, visu
 
             if visualize:
                 # visualize the first image form the batch
-                vis_labels = predict_labels[0, :, :].cpu().clone().numpy()
-                img_vis = X_val[0, :, :, :].cpu().clone().numpy()
-                img_vis[vis_labels != 1] = 0
+                vis_labels = predict_labels[0, :, :].cpu().clone()
+                img_vis = X_val[0, :, :, :].cpu().clone()
+                img_vis[:, vis_labels != 1] = 0
                 imshow(img_vis)
 
 
