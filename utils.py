@@ -20,6 +20,12 @@ def imsave(img, path):
     pil_img = Image.fromarray(np_img)
     pil_img.save(path)
 
+def fast_accuracy_approx(predict_labels: torch.tensor, labels: torch.tensor, ignore_label: int):
+
+    ignore_mask = labels != ignore_label
+    acc = (torch.sum(predict_labels[ignore_mask] == labels[ignore_mask]) / torch.sum(ignore_mask))
+    return acc
+
 def get_cls_stats(predict_labels: torch.tensor, labels: torch.tensor, unique_labels: list, ignore_label: int):
 
     true_posities = []
