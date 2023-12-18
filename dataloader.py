@@ -51,7 +51,7 @@ class UROBDataset(Dataset):
 
         if torch.rand(1).item() < self.p_cutmix:
             # do cutmix
-            pass
+            img, labels = self.my_cutmix(sample_x=img, sample_y=labels)
         
         return img, labels
 
@@ -75,15 +75,27 @@ class UROBDataset(Dataset):
 
         return img, labels
     
-    def my_cutmix(self, sample_x: torch.tensor, sample_y: torch.tensor):
+    def my_cutmix(self, sample_x: np.ndarray, sample_y: np.ndarray):
 
         # choose random sample to augment with
         aug_sample_path = random.choice(self.filenames)
         aug_sample_x, aug_sample_y = self.get_sample(aug_sample_path)
 
+        feasible_targets = np.unique(aug_sample_y).tolist()
+        feasible_targets.remove(0)
+        feasible_targets.remove(self.ignore_label)
+        if len(feasible_targets) == 0:
+            return sample_x, sample_y
+
         # select the random label to augment
-        target_label = 
+        target_label = random.choice(feasible_targets)
+        target_mask = aug_sample_y == target_label
+        random_shift = np.random.randint(0, 300, size=(2,)) # TODO() more shifts + shoft the masks
+        
+        # just a test
+        sample_x[:, target_mask] = aug_sample_x[:, target_mask]
+        sample_y[target_mask] = aug_sample_y[target_mask]
 
-
+        return sample_x, sample_y
 
 
