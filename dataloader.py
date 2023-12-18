@@ -14,7 +14,7 @@ class UROBDataset(Dataset):
             self.filenames = pickle.load(file)
 
         self.label_mapping = label_mapping
-        self.p_cutmix = 0.5
+        self.p_cutmix = p_cutmix
         self.target_shape = target_img_shape
         self.ignore_label = ignore_label
         self.transform = transforms.Compose([transforms.Resize(512, interpolation=Image.BICUBIC, antialias=True)])
