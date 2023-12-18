@@ -85,6 +85,7 @@ def validate(val_dataloader, model, device, criterion, unique_labels: list, visu
                 #img_vis[2, vis_labels != 1] = 255
                 true_abels = y_val[0, :, :].cpu().clone().numpy()
                 img_vis[0, np.logical_and(vis_labels == 1, true_abels != 10)] = 1
+                img_vis[2, np.logical_and(vis_labels == 2, true_abels != 10)] = 1
                 if save_path is not None:
                     img_name = f'val_sample_{val_iter}.jpg'
                     img_path = os.path.join(save_path, img_name)

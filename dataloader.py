@@ -4,25 +4,30 @@ import numpy as np
 import torch
 from PIL import ImageOps, Image
 from torchvision import transforms
+import random
 
 
 class UROBDataset(Dataset):
 
-    def __init__(self, filenames_file: str, target_img_shape: list,  label_mapping: dict = None, ignore_label: int = 10) -> None:
+    def __init__(self, filenames_file: str, target_img_shape: list,  label_mapping: dict = None, ignore_label: int = 10, p_cutmix: float = 0.5) -> None:
         with open(filenames_file, 'rb') as file:
             self.filenames = pickle.load(file)
 
         self.label_mapping = label_mapping
-
+        self.p_cutmix = 0.5
         self.target_shape = target_img_shape
         self.ignore_label = ignore_label
         self.transform = transforms.Compose([transforms.Resize(512, interpolation=Image.BICUBIC, antialias=True)])
+        
+        # get unique labels
+        unique_labels_list = [0] + [label_mapping[key] for key in self.label_mapping.keys()]
+        self.unique_labels = torch.unique(torch.tensor(unique_labels_list, dtype=int))
+
 
     def __len__(self):
         return len(self.filenames)
-
-    def __getitem__(self, index):
-        filepath = self.filenames[index]
+    
+    def get_sample(self, filepath: str):
         with np.load(filepath, allow_pickle=True) as file:
             img = file['X']
             sem_seg = file['y']
@@ -37,6 +42,17 @@ class UROBDataset(Dataset):
         img = 2 * (img / 255) - 1 
         img = np.transpose(img, (2, 0, 1))
 
+        return img, labels
+
+    def __getitem__(self, index):
+        filepath = self.filenames[index]
+
+        img, labels = self.get_sample(filepath=filepath)
+
+        if torch.rand(1).item() < self.p_cutmix:
+            # do cutmix
+            pass
+        
         return img, labels
 
 
@@ -58,7 +74,15 @@ class UROBDataset(Dataset):
         #print(img.shape, labels.shape)
 
         return img, labels
+    
+    def my_cutmix(self, sample_x: torch.tensor, sample_y: torch.tensor):
 
+        # choose random sample to augment with
+        aug_sample_path = random.choice(self.filenames)
+        aug_sample_x, aug_sample_y = self.get_sample(aug_sample_path)
+
+        # select the random label to augment
+        target_label = 
 
 
 
