@@ -5,6 +5,7 @@ import torch
 from PIL import ImageOps, Image
 from torchvision import transforms
 import random
+import os
 
 
 class UROBDataset(Dataset):
@@ -28,10 +29,18 @@ class UROBDataset(Dataset):
         return len(self.filenames)
     
     def get_sample(self, filepath: str):
-        with np.load(filepath, allow_pickle=True) as file:
-            img = file['X']
-            sem_seg = file['y']
+        
+        src_dirname = os.path.dirname(os.path.dirname(os.path.dirname(filepath)))
+        src_name = os.path.basename(filepath).split('.')[-2]
+        img_path = os.path.join(src_dirname, 'rgb', f'{src_name}.jpg')
+        if not os.path.isfile(img_path):
+            img_path = os.path.join(src_dirname, 'rgb', f'{src_name}.png')
+        else:
+            print(f'unknown image type: {os.path.basename(filepath)}')
+        seg_path = os.path.join(src_dirname,'seg', f'{src_name}.npy')
 
+        img = np.asanyarray(Image.open(img_path))
+        sem_seg = np.load(seg_path)
 
         labels = np.zeros_like(sem_seg, dtype=float)
         for label_mapping_key in self.label_mapping.keys():
