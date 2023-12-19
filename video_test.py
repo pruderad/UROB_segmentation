@@ -6,9 +6,10 @@ from dataloader import UROBDataset
 import cv2
 import numpy as np
 import torchvision.transforms.v2 as transforms
+import torch.nn.functional as F
 
 
-VIDEO_MODE = False
+VIDEO_MODE = True
 
 
 def visualize_segmentation(image, segmentation_mask, unique_labels):
@@ -72,9 +73,9 @@ device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
 print(device)
 
 # Model and dataset paths
-model_path = './saved_models/ondra_model01.pt'
+model_path = './saved_models/radim_model01.pt'
 
-unique_labels = [0, 1]
+unique_labels = [0, 1, 2]
 
 # Load the pre-trained model
 #model = MobileV3Small(num_classes=len(unique_labels))
@@ -118,13 +119,16 @@ while True:
         #print(output.shape)
 
     # Post-process the segmentation mask
-    segmentation_mask = torch.argmax(output, dim=1).squeeze().cpu().numpy()
+    segmentation_mask = torch.argmax(output, dim=1).squeeze(0).cpu().numpy()
+    probas = F.softmax(output, dim=1).squeeze(0).cpu().numpy()
     #print(segmentation_mask.shape)
     #vis_labels = segmentation_mask[0, :, :]
-    segmented_image = visualize_segmentation(frame, segmentation_mask, unique_labels)
+    print(probas.shape)
+    cv2.imshow("depression", np.transpose(probas, (2, 1, 0)))
+    #segmented_image = visualize_segmentation(frame, segmentation_mask, unique_labels)
 
     # Display the result
-    cv2.imshow('Segmentation', segmented_image)
+    #cv2.imshow('Segmentation', segmented_image)
     if not VIDEO_MODE:
         cv2.waitKey(1000)
     if cv2.waitKey(30) & 0xFF == 27:  # Press 'Esc' to exit
