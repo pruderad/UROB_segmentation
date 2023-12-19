@@ -107,4 +107,21 @@ class UROBDataset(Dataset):
 
         return sample_x, sample_y
 
+    def augment_background(transforms, img: np.ndarray, labels: np.ndarray, background_labels: list = [0]):
+
+        img_orig = torch.from_numpy(img.copy())
+        mask = torch.ones_like(img_aug[0, :, :], dtype=int) # mask -- 1 where foreground
+        for label in background_labels:
+            mask[labels == label] = 0
+        
+        # transform the image
+        img_aug = transforms(img_orig)
+        
+        # bring back the original foreground pixels
+        img_aug[:, :, mask] = img_orig[:, :, mask]
+        img_aug = img_aug.numpy()
+
+        return img_aug
+        
+
 
