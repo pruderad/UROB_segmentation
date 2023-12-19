@@ -30,7 +30,7 @@ class UROBDataset(Dataset):
     
     def get_sample(self, filepath: str):
         
-        src_dirname = os.path.dirname(os.path.dirname(os.path.dirname(filepath)))
+        src_dirname = os.path.dirname(os.path.dirname(filepath))
         src_name = os.path.basename(filepath).split('.')[-2]
         img_path = os.path.join(src_dirname, 'rgb', f'{src_name}.jpg')
         if not os.path.isfile(img_path):
