@@ -17,7 +17,7 @@ def visualize_segmentation(image, segmentation_mask, unique_labels):
     # Define colors for each class
     colors = {
         0: [0, 0, 0],   # Background (Black)
-        1: [255, 0, 0],  # Class 1 (Red)
+        1: [0, 255, 0],  # Class 1 (Red)
         2: [0, 0, 255]   # Class 2 (Green)
         # Add more colors for additional classes if needed
     }
@@ -73,20 +73,20 @@ device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
 print(device)
 
 # Model and dataset paths
-model_path = './saved_models/radim_model01.pt'
+model_path = './experiments/radim/model.pt'
 
 unique_labels = [0, 1, 2]
 
 # Load the pre-trained model
-#model = MobileV3Small(num_classes=len(unique_labels))
-model = MobileV3Large(num_classes=len(unique_labels))
+model = MobileV3Small(num_classes=len(unique_labels))
+#model = MobileV3Large(num_classes=len(unique_labels))
 model.load_state_dict(torch.load(model_path, map_location=device))
 model = model.to(device)
 model.eval()
 
 # OpenCV Video Capture from a video file
 if VIDEO_MODE:
-    video_path = '/home/koondra/Downloads/Race Highlights 2023 Japanese Grand Prix.mp4'  # Provide the path to your video file
+    video_path = 'jedah.mp4'  # Provide the path to your video file
     cap = cv2.VideoCapture(video_path)
 else:
     filenames = get_all_file_paths('./dataset/tests/')
@@ -124,14 +124,14 @@ while True:
     #print(segmentation_mask.shape)
     #vis_labels = segmentation_mask[0, :, :]
     print(probas.shape)
-    cv2.imshow("depression", np.transpose(probas, (2, 1, 0)))
-    #segmented_image = visualize_segmentation(frame, segmentation_mask, unique_labels)
+    #cv2.imshow("depression", np.transpose(probas, (2, 1, 0)))
+    segmented_image = visualize_segmentation(frame, segmentation_mask, unique_labels)
 
     # Display the result
-    #cv2.imshow('Segmentation', segmented_image)
+    cv2.imshow('Segmentation', segmented_image)
     if not VIDEO_MODE:
         cv2.waitKey(1000)
-    if cv2.waitKey(30) & 0xFF == 27:  # Press 'Esc' to exit
+    if cv2.waitKey(1) & 0xFF == 27:  # Press 'Esc' to exit
         break
 
 # Release the capture and close windows
