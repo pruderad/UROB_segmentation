@@ -73,13 +73,14 @@ device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
 print(device)
 
 # Model and dataset paths
-model_path = './experiments/radim/model.pt'
+model_path = './experiments/radim/checkpoint.pt'
+#model_path = './saved_models/radim_model01.pt'
 
 unique_labels = [0, 1, 2]
 
 # Load the pre-trained model
-model = MobileV3Small(num_classes=len(unique_labels))
-#model = MobileV3Large(num_classes=len(unique_labels))
+#model = MobileV3Small(num_classes=len(unique_labels))
+model = MobileV3Large(num_classes=len(unique_labels))
 model.load_state_dict(torch.load(model_path, map_location=device))
 model = model.to(device)
 model.eval()
@@ -123,11 +124,11 @@ while True:
     probas = F.softmax(output, dim=1).squeeze(0).cpu().numpy()
     #print(segmentation_mask.shape)
     #vis_labels = segmentation_mask[0, :, :]
-    print(probas.shape)
     #cv2.imshow("depression", np.transpose(probas, (2, 1, 0)))
     segmented_image = visualize_segmentation(frame, segmentation_mask, unique_labels)
 
     # Display the result
+    segmented_image = cv2.cvtColor(segmented_image, cv2.COLOR_BGR2RGB)
     cv2.imshow('Segmentation', segmented_image)
     if not VIDEO_MODE:
         cv2.waitKey(1000)
