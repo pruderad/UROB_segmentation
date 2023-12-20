@@ -10,7 +10,7 @@ import os
 
 class UROBDataset(Dataset):
 
-    def __init__(self, filenames_file: str, target_img_shape: list,  label_mapping: dict = None, ignore_label: int = 10, p_cutmix: float = 0.5) -> None:
+    def __init__(self, filenames_file: str, target_img_shape: list,  label_mapping: dict = None, ignore_label: int = 10, p_cutmix: float = 0.5, background_transform = None) -> None:
         with open(filenames_file, 'rb') as file:
             self.filenames = pickle.load(file)
 
@@ -19,6 +19,7 @@ class UROBDataset(Dataset):
         self.target_shape = target_img_shape
         self.ignore_label = ignore_label
         self.transform = transforms.Compose([transforms.Resize(512, interpolation=Image.BICUBIC, antialias=True)])
+        self.backround_transform = background_transform
         
         # get unique labels
         unique_labels_list = [0] + [label_mapping[key] for key in self.label_mapping.keys()]
@@ -61,6 +62,9 @@ class UROBDataset(Dataset):
         if torch.rand(1).item() < self.p_cutmix:
             # do cutmix
             img, labels = self.my_cutmix(sample_x=img, sample_y=labels)
+
+        if torch.rand(1).item() > 0.5 and self.backround_transform is not None:
+            img = self.augment_background(img=img, labels=labels, background_labels=[0])
         
         return img, labels
 
@@ -107,7 +111,7 @@ class UROBDataset(Dataset):
 
         return sample_x, sample_y
 
-    def augment_background(transforms, img: np.ndarray, labels: np.ndarray, background_labels: list = [0]):
+    def augment_background(self, img: np.ndarray, labels: np.ndarray, background_labels: list = [0]):
 
         img_orig = torch.from_numpy(img.copy())
         mask = torch.ones_like(img_aug[0, :, :], dtype=int) # mask -- 1 where foreground
@@ -115,7 +119,7 @@ class UROBDataset(Dataset):
             mask[labels == label] = 0
         
         # transform the image
-        img_aug = transforms(img_orig)
+        img_aug = self.background_transform(img_orig)
         
         # bring back the original foreground pixels
         img_aug[:, :, mask] = img_orig[:, :, mask]
