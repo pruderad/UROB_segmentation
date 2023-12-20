@@ -73,21 +73,21 @@ device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
 print(device)
 
 # Model and dataset paths
-model_path = './experiments/radim/checkpoint.pt'
+model_path = './saved_models/radim_ultimate_best_model.pt'
 #model_path = './saved_models/radim_model01.pt'
 
 unique_labels = [0, 1, 2]
 
 # Load the pre-trained model
-#model = MobileV3Small(num_classes=len(unique_labels))
-model = MobileV3Large(num_classes=len(unique_labels))
+model = MobileV3Small(num_classes=len(unique_labels))
+#model = MobileV3Large(num_classes=len(unique_labels))
 model.load_state_dict(torch.load(model_path, map_location=device))
 model = model.to(device)
 model.eval()
 
 # OpenCV Video Capture from a video file
 if VIDEO_MODE:
-    video_path = 'jedah.mp4'  # Provide the path to your video file
+    video_path = 'abudhabi.mp4'  # Provide the path to your video file
     cap = cv2.VideoCapture(video_path)
 else:
     filenames = get_all_file_paths('./dataset/tests/')
@@ -109,7 +109,7 @@ while True:
         index += 1
 
     # Preprocess the frame
-    frame = fix_sizes(frame, [512, 1024])  # Resize to match the model input size
+    frame = fix_sizes(frame, [512, 920])  # Resize to match the model input size
     #frame = np.transpose(frame, (2, 0, 1))
     frame_tensor = torch.tensor(frame / 255.0, dtype=torch.float32).permute(2, 0, 1).unsqueeze(0).to(device)
     frame_tensor = 2* (frame_tensor) - 1 

@@ -57,7 +57,7 @@ class UROBDataset(Dataset):
 
         img, labels = self.get_sample(filepath=filepath)
 
-        if torch.rand(1).item() < self.p_cutmix:
+        if torch.rand(1).item() < self.p_cutmix and self.p_cutmix != 0:
             # do cutmix
             img, labels = self.my_cutmix(sample_x=img, sample_y=labels)
 
@@ -94,7 +94,8 @@ class UROBDataset(Dataset):
 
         feasible_targets = np.unique(aug_sample_y).tolist()
         feasible_targets.remove(0)
-        feasible_targets.remove(self.ignore_label)
+        if self.ignore_label in feasible_targets:
+            feasible_targets.remove(self.ignore_label)
         if len(feasible_targets) == 0:
             return sample_x, sample_y
 
