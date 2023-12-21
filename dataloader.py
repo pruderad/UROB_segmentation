@@ -102,13 +102,32 @@ class UROBDataset(Dataset):
         # select the random label to augment
         target_label = random.choice(feasible_targets)
         target_mask = aug_sample_y == target_label
-        random_shift = np.random.randint(0, 300, size=(2,)) # TODO() more shifts + shoft the masks
-        
+
         # just a test
         sample_x[:, target_mask] = aug_sample_x[:, target_mask]
         sample_y[target_mask] = aug_sample_y[target_mask]
 
         return sample_x, sample_y
+    
+    def shift_binary_mask(self, mask, shift_x, shift_y):
+    # Get the shape of the original mask
+        original_shape = mask.shape
+
+        # Create a new array with zeros of shape (N + abs(shift_y), M + abs(shift_x))
+        shifted_mask = np.zeros((original_shape[0], original_shape[1]), dtype=mask.dtype)
+
+        # Determine the region to copy from the original mask
+        y_start = max(0, shift_y)
+        y_end = min(original_shape[0] + shift_y, shifted_mask.shape[0])
+
+        x_start = max(0, shift_x)
+        x_end = min(original_shape[1] + shift_x, shifted_mask.shape[1])
+
+        # Copy the relevant region from the original mask to the shifted mask
+        shifted_mask[y_start:y_end, x_start:x_end] = mask[max(0, -shift_y):min(original_shape[0], shifted_mask.shape[0] - shift_y),
+                                                        max(0, -shift_x):min(original_shape[1], shifted_mask.shape[1] - shift_x)]
+
+        return shifted_mask
 
     def augment_background(self, img: np.ndarray, labels: np.ndarray, background_labels: list = [0]):
 
